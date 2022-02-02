@@ -1,6 +1,7 @@
 % WILL NOT WORK FOR N < 4 %
-function [LT, RT, S] = partialMTTKRP(X,U,N)
-% Z is a tense, U is a cell array, N is number of nodes
+% Update either LT or RT for output
+function [LT, RT] = partialMTTKRP(X,U,S)
+% X is a tense, U is a cell array, N is number of nodes
 %MTTKRP Matricized tensor times Khatri-Rao product for sparse tensor.
 %
 %   V = partialMTTKRP(X,U,S,LR) efficiently calculates the matrix product of the
@@ -11,12 +12,12 @@ function [LT, RT, S] = partialMTTKRP(X,U,N)
 
 % partialMTTKRP algorithm:
 % Z is an N-way tensor and U cell array with N
-% factor matrices. S is 
-% the inputs will be the tensor, the cell array of factor matrices, S, 
-% and left-or-right toggle
+% factor matrices. S is the split node
 
 % Determines split node as middle node
-S = uint8(1 + (N-1)/2);
+% S = uint8(1 + (N-1)/2);
+
+N = size(U,2);
 
 % left partial KRP from N to S
 % Throw in if statement later to handle out of bounds later
@@ -75,3 +76,4 @@ RT = tensor(tenmat(X,S:N) * RKRP);
 % V = growSum;
 
 end
+
