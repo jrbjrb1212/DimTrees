@@ -1,15 +1,20 @@
-function V = multiTTV(LT,RT,X,S,n,N)
+% multiTTV
+% Take in one tensor
+% Get updated tesnor and MTTKRP as output
+function [V,T_update] = multiTTV(T,X,S,n)
 % The multiTTV algortihm should efficiently calculates the matrix product
 % of the n-mode matricization of X with the Khatri-Rao product of all
 % entries in U, a cell array of matrices, except the nth. The mutliTTV
 % takes advtange of partially computed MTTKRP's in the form of reusing them
 % in the computation of a specific mttkrp of mode
 
-% LT and RT are temp tensor
+% LT and RT are temp tensors
 % X is cell array of factor matrices
 % S is split node
 % n is the mode for the mttkrp to compute
 % N is the total number of nodes
+
+N = size(X,2);
 
 % determines size of output MTTKRP product
 if (n == 1)
@@ -23,7 +28,7 @@ end
 % we use LT as the left partial MTTKRP
 if n < S
     % set up output MTTKRP array
-    V = zeros(size(LT,n),R);
+    V = zeros(size(T,n),R);
     for r = 1:R
         % Set up cell array with appropriate vectors for ttv multiplication
         Z = cell(S-2,1);
@@ -33,8 +38,9 @@ if n < S
             Z{j} = X{i}(:,r);
             j = j + 1;
         end
+        
         % Perform ttv multiplication
-        double(ttv(LT, Z, list));
+        double(ttv(T, Z, list));
         V(:,r) = ans(:,r);
     end
     
@@ -42,7 +48,7 @@ if n < S
 % we use RT as the right partial MTTKRP
 else
      % set up output MTTKRP array
-     V = zeros(size(RT,n-S+1),R);
+     V = zeros(size(T,n-S+1),R);
     for r = 1:R
         % Set up cell array with appropriate vectors for ttv multiplication
         Z = cell(N-S,1);
@@ -52,11 +58,13 @@ else
             Z{j} = X{i}(:,r);
             j = j + 1;
         end
+        
         % Perform ttv multiplication
-        double(ttv(RT, Z, list));
+        double(ttv(T, Z, list));
         V(:,r) = ans(:,r);
     end
 end
+T_update = T;
 end
 
 
