@@ -63,7 +63,7 @@ elseif T_OR_R == 2
 end
 
 
-
+%%% old working version
 % if n < S-1
 %     % multittv to find the MTTKRP result for mode 1
 %     % then use multittv to update tensor
