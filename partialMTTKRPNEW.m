@@ -7,18 +7,27 @@ function T = partialMTTKRPNEW(Z,U,S,side)
 % Output: partialMTTKRP Tensor T
 
 % could also use N = size(U,2);
+dims = size(Z);
 N = ndims(Z);
 
 % left partial KRP from N to S
 if side == 1
-   T = tensor(tenmat(Z,1:S-1) * khatrirao(U{N:-1:S}));
+    if (mod(N,2) == 0)
+        T = tensor(double(reshape(Z,[prod(dims(1:S-1)),prod(dims(S:N))])) * khatrirao(U{N:-1:S}));
+        T = reshape(T, dims(N:-1:S-1));
+    else
+        T = tensor(tenmat(Z,1:S-1) * khatrirao(U{N:-1:S}));
+    end
    
 % right partial KRP from S-1 to 1
 elseif side == 2
-   T = tensor(tenmat(Z,S:N) * khatrirao(U{S-1:-1:1}));
-   
+    if (mod(N,2) == 0)
+       T = tensor(double(reshape(Z,[prod(dims(1:S-1)),prod(dims(S:N))]))' * khatrirao(U{S-1:-1:1}));
+       T = reshape(T, dims(S:-1:1));
+    else
+       T = tensor(tenmat(Z,S:N) * khatrirao(U{S-1:-1:1}));
+    end
+     
 end
-  
-
 end
 
