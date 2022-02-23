@@ -7,14 +7,14 @@ function [W,Y] = MTTKRP_TEST()
 % N = 12;
 
 % test case 2
-Z = tensor(rand(50,50,50,50,50));
-X = {rand(50,50), rand(50,50),rand(50,50), rand(50,50), rand(50,50)};
-N = 5;
+% Z = tensor(rand(50,50,50,50,50));
+% X = {rand(50,50), rand(50,50),rand(50,50), rand(50,50), rand(50,50)};
+% N = 5;
 
 % test case 3
-% Z = tensor(rand(25,25,25,25,25,25));
-% X = {rand(25,25),rand(25,25),rand(25,25),rand(25,25),rand(25,25), rand(25,25)};
-% N = 6;
+Z = tensor(rand(30,30,30,30,30,30));
+X = {rand(30,30),rand(30,30),rand(30,30),rand(30,30),rand(30,30), rand(30,30)};
+N = 6;
 
 % test case 4
 % Z = tensor(rand(3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3));
@@ -26,18 +26,29 @@ N = 5;
 % X = {rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3), rand(3,3)};
 % N = 6;
 
-for k = 1:10
+% test case 6
+% Z = tensor(rand(150,150,150,150));
+% X = {rand(150,150),rand(150,150),rand(150,150),rand(150,150)};
+% N = 4;
+
+% test case 7
+% Z = tensor(rand(30,30,30,30,30));
+% X = {rand(30,30), rand(30,30),rand(30,30), rand(30,30), rand(30,30)};
+% N = 5;
+
+
+for k = 1:5
     tic
-    % current implementation
     Y = cell(N,1);
     for n = 1:N
         Y{n} = mttkrp(Z,X,n);
     end
     timeOrig = toc;
 
-    % correct strucutre for dim trees
+    % correct strucutre
+    S = uint8(1 + (N-1)/2); % outside because it will be in application
+    
     tic
-    S = uint8(1 + (N-1)/2);
     W = cell(N, 1);
     %MATRIX = cell(N, 1);
     for n = 1:N
@@ -45,68 +56,42 @@ for k = 1:10
             % LEFT KRP TENSOR calculation
             T = partialMTTKRPNEW(Z, X, S, 1);
             % Multittv for MTTKRP result
-            W{n} = multiTTVNEW(T,X(1:S-1),S,n,1);
+            W{n} = multiTTVResult(T,X(1:S-1));
             
         elseif n < S-1
             % Multittv for Internal node update
-            T = multiTTVNEW(T,X(n-1:S-1),S,1,2);
+            T = multiTTVUpdate(T,X{n-1});
             % Multittv for MTTKRP result
-            W{n} = multiTTVNEW(T,X(n:S-1),S,1,1);
+            W{n} = multiTTVResult(T,X(n:S-1));
           
         elseif n == S-1
             %  Multittv for Internal node update
-            T = multiTTVNEW(T,X(n-1:S-1),S,1,2);
+            T = multiTTVUpdate(T,X{n-1});
             % Multittv for MTTKRP result
-            W{n} = T.data;
+            W{n} = double(T);
             
         elseif n == S
             % RIGHT KRP TENSOR calculation
             T = partialMTTKRPNEW(Z, X, S, 2);
             % multittv for MTTKRP result
-            W{n} = multiTTVNEW(T,X(n:N),S,S,1);
+            W{n} = multiTTVResult(T,X(n:N));
             
         elseif n < N
            % Multittv for Internal node update
-           T = multiTTVNEW(T, X(n-1:N), S, S, 2);
+           T = multiTTVUpdate(T, X{n-1});
            % Multittv for MTTKRP result
-           W{n} = multiTTVNEW(T, X(n:N), S, S, 1);
+           W{n} = multiTTVResult(T, X(n:N));
            
         else
            %  Multittv for Internal node update
-           T = multiTTVNEW(T,X(n-1:N),S,S,2);
+           T = multiTTVUpdate(T,X{n-1});
            % Multittv for MTTKRP result
-           W{n} = T.data;
-    
+           W{n} = double(T);
         end
         %MATRIX{n} = T;
     end
-    timeNew = toc;   
+    timeNew = toc;
     disp("Optimization versus Standard Ratio: " + sprintf("%0.4f",timeOrig/timeNew) + "x speed up");
     %disp("New Time: " + timeNew + " is " + (timeOrig - timeNew) + " faster than Original Time: " + timeOrig);
 end
 end
-    
-    
-    
-%     tic
-%     W = cell(N, 1);
-%     S = uint8(1 + (N-1)/2);
-%     const = 0;
-%     [LT,RT] = partialMTTKRP(Z,X,S);
-%     T = LT;
-%     for n = 1:S-1
-%         [W{n}, T, const] = multiTTVNEW(T,X,S,n,const);
-%     end
-% 
-%     T = RT;
-%     for n = S:N
-%         [W{n},T,const] = multiTTVNEW(T,X,S,n,const);
-%     end
-%     timeNew = toc;
-    
-%     % compare ratio here
-%     disp("New Time: " + timeNew + " is " + (timeOrig - timeNew) + " faster than Original Time: " + timeOrig);
-%     
-% end
-% 
-% end
