@@ -28,5 +28,4 @@ for r = 1:R
     tempStore = double(ttv(T, Z, list));
     V(:,r) = tempStore(:,r); 
 end
-
 end
