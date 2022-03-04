@@ -53,41 +53,46 @@ for k = 1:numTimes
     timeOrig = toc;
 
     % correct strucutre
-    % S = uint8(1 + (N-1)/2); % outside because it will be in application
     tic
     
     dims = size(Z);
     ndimsZ = ndims(Z);
     
     % total tensor entries
-    % totalEntries = 1;
     total_entries = prod(dims);
     
-    i = 0;
-    S = ndimsZ + 1;
-    left_prod = 1;
-    right_prod = 1;
+%     i = 0;
+%     S = ndimsZ + 1;
+%     left_prod = 1;
+%     right_prod = 1;
+    
+    % approximate root
     approx_root = sqrt(total_entries);
      
     % do later
     % cumprod from left and cumprod from the right
     % take minium val
-    % find(cumprod(dims) < approx_root) 
-    while i < S
-        if (left_prod <= approx_root)
-            left_prod = left_prod * dims(i+1);
-            i = i+1;
-        else
-            right_prod = right_prod * dims(S-1);
-            S = S-1;
-        end
-    end
+    
+    % finds split node
+    list = find(cumprod(dims) <= approx_root);
+    S = list(end) + 1;
+ 
+%     while i < S
+%         if (left_prod <= approx_root)
+%             left_prod = left_prod * dims(i+1);
+%             i = i+1;
+%         else
+%             right_prod = right_prod * dims(S-1);
+%             S = S-1;
+%         end
+%     end
     
     
     
     W = cell(N, 1);
     %MATRIX = cell(N, 1);
     for n = 1:N
+        
         if n == 1
             % LEFT KRP TENSOR calculation
             T = partialMTTKRPNEW(Z, X, S, 1);
@@ -125,6 +130,7 @@ for k = 1:numTimes
            W{n} = double(T);
         end
         %MATRIX{n} = T;
+        
     end
     timeNew = toc;
     disp("Optimization versus Standard Ratio: " + sprintf("%0.4f",timeOrig/timeNew) + "x speed up");
