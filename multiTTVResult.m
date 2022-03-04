@@ -13,31 +13,7 @@ R = size(U{1},2);
 V = zeros(size(T,1),R);
 
 % could do kroncker of vectors
-% 
-
-% for r = 1:R
-%     Z = cell(N-1,1);
-%     j = 1;
-%     % maybe replace with cellfun
-%     for i = 2:N
-%         list(j) = i;
-%         Z{j} = U{i}(:,r);
-%         j = j + 1;
-%     end
-% 
-%     % Perform ttv multiplication
-%     % try to do it without tensortoolbox
-%     % try khatrioaro
-%     % 1 R for loop
-%     % pull out a block from T 
-%     % form khatraio of vectors
-%     
-%     T
-%     tempStore = double(ttv(T, Z, list));
-%     V(:,r) = tempStore(:,r);  
-%     V
-%     
-% end
+%
 
 
 for r = 1:R
