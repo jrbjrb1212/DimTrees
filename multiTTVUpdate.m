@@ -1,4 +1,4 @@
-function [X,T_block] = multiTTVUpdate(T,U)
+function X = multiTTVUpdate(T,U)
 % Inputs: a partialMTTKRP tensor T, a single factor matrix U
 
 % Outputs: X the updated tensor
