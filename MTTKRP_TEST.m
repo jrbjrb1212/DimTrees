@@ -16,15 +16,15 @@ function [W,Y] = MTTKRP_TEST()
 %X = {rand(25,25),rand(25,25),rand(25,25),rand(25,25),rand(25,25), rand(25,25)};
 %N = 6;
 
-% test case 4
+% % test case 4
 % Z = tensor(rand(3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3));
 % X = {rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3)};
 % N = 17;
 
-% test case 5
-Z = tensor(rand(3,3,3,3,3));
-X = {rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3)};
-N = 5;
+%test case 5
+% Z = tensor(rand(3,3,3,3,3));
+% X = {rand(3,3),rand(3,3),rand(3,3),rand(3,3),rand(3,3)};
+% N = 5;
 
 % % test case 6
 % Z = tensor(rand(3,3,3,3,3,3));
@@ -55,16 +55,11 @@ for k = 1:numTimes
     % correct strucutre
     tic
     
+    % mode dimension of tensors
     dims = size(Z);
-    ndimsZ = ndims(Z);
     
     % total tensor entries
     total_entries = prod(dims);
-    
-%     i = 0;
-%     S = ndimsZ + 1;
-%     left_prod = 1;
-%     right_prod = 1;
     
     % approximate root
     approx_root = sqrt(total_entries);
@@ -76,17 +71,6 @@ for k = 1:numTimes
     % finds split node
     list = find(cumprod(dims) <= approx_root);
     S = list(end) + 1;
- 
-%     while i < S
-%         if (left_prod <= approx_root)
-%             left_prod = left_prod * dims(i+1);
-%             i = i+1;
-%         else
-%             right_prod = right_prod * dims(S-1);
-%             S = S-1;
-%         end
-%     end
-    
     
     
     W = cell(N, 1);
