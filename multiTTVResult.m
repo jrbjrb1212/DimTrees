@@ -15,12 +15,10 @@ Tmat = reshape(double(T), [prod(dims(1:end-1)), R]);
 
 
 for r = 1:R
-
-    % forms vectors
     Z = cellfun(@(x) x(:,r), U(2:N), 'UniformOutput', false);
+    Kvector = khatrirao(Z(end:-1:1));
     
     T_block = reshape(Tmat(:,r),[dims(1), prod(dims(2:N))]);
-    Kvector = khatrirao(Z(end:-1:1));
     
     %tempStore = T_block * Kvector;
     V(:,r) = T_block * Kvector;
