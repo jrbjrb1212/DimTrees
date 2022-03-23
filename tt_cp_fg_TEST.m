@@ -4,8 +4,8 @@ if option == 1
     T = tensor(rand(1000,1000,1000));
     U = {rand(1000,100), rand(1000,100), rand(1000,100)};
 elseif option == 2
-    T = tensor(rand(200,200,200,200));
-    U = {rand(200,20), rand(200,20), rand(200,20), rand(200,20)};
+    T = tensor(rand(75,75,75,75));
+    U = {rand(75,20), rand(75,20), rand(75,20), rand(75,20)};
 elseif option == 3
     T = tensor(rand(30,30,30,30,30,30));
     U = {rand(30,5), rand(30,5), rand(30,5), rand(30,5), rand(30,5), rand(30,5)};
@@ -17,7 +17,7 @@ else
 end
 
 
-profile on
+%profile on
 % new implementation
 tic
 X = tt_cp_fg_NEW(T,U);
@@ -28,8 +28,8 @@ tic
 Y = tt_cp_fg(T,U);
 timeOrig = toc;
 
-profile viewer
-profile off
+%profile viewer
+%profile off
 
 % X - Y for testing
 disp("Optimization versus Standard Ratio: " + sprintf("%0.4f",timeOrig/timeNew) + "x speed up");
