@@ -17,7 +17,9 @@ R = size(U{1}, 2);
 
 % left partial KRP from N to S
 if side == 1
+     %tic
      T = tensor(reshape(double(T),[prod(dims(1:S-1)), prod(dims(S:N))]) * khatrirao(U{N:-1:S}));
+    %toc
     
      T = tensor(reshape(T, [dims(1:S-1), R]));
      
@@ -29,7 +31,9 @@ if side == 1
 
 % right partial KRP from S-1 to 1
 elseif side == 2
-    T = tensor(reshape(double(T),[prod(dims(1:S-1)), prod(dims(S:N))])' * khatrirao(U{S-1:-1:1}));  
+    %tic
+    T = tensor(reshape(double(T),[prod(dims(1:S-1)), prod(dims(S:N))])' * khatrirao(U{S-1:-1:1}));
+    %tock
 
     T = tensor(reshape(T, [dims(S:N), R]));
     
