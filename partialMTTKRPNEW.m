@@ -27,6 +27,7 @@ R = size(U{1}, 2);
 if side == 1
      Z = tensor(reshape(double(T),[prod(dims(1:S-1)), prod(dims(S:N))]) * khatrirao(U{N:-1:S}));
      Z = tensor(reshape(Z, [dims(1:S-1), R]));
+end
 
 % RIGHT PARTIAL TENSOR COMPUTATION
 % Calculates the khatriao product from S-1 to 1 and computes with mode
