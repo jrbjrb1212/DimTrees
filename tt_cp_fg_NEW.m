@@ -42,7 +42,6 @@ end
 
 Gamma = cell(N,1);
 Gamma{1} = 1;
-
 for n = 2:n
     Gamma{n} = Gamma{n-1} .* Upsilon{n-1};
 end
@@ -63,58 +62,49 @@ else
     f_1 = norm(Z)^2;
 end
 
-%% Calculate gradient and F2
+%% Calculate gradient and F2 with Dimension Trees Optimization
 G = cell(N,1);
 U = G;
 
-% input dimtrees optimization for mttkrp using list of mttkrp results
-% mode dimension of tensors
 dims = size(Z);
-total_Z_entries = prod(dims);
-approx_root = sqrt(total_Z_entries);
-    
 % finds split node
+%total_entries = prod(dims);
+approx_root = sqrt(prod(dims));
 list = find(cumprod(dims) <= approx_root);
 S = list(end) + 1;
 
+% dimtrees optimization for mttkrp
 for n = 1:N
         if n == 1
-            % LEFT KRP TENSOR calculation
+            % LEFT PARTIAL TENSOR 
             T = partialMTTKRPNEW(Z, A, S, 1);
-            % Multittv for MTTKRP result
+            % Multittv for first MTTKRP result
             U{n} = multiTTVResult(T,A(1:S-1));
             
         elseif n < S-1
-            % Multittv for Internal node update
+            % Internal node update
             T = multiTTVUpdate(T,A{n-1});
-            % Multittv for MTTKRP result
             U{n} = multiTTVResult(T,A(n:S-1));
           
         elseif n == S-1
-            %  Multittv for Internal node update
             T = multiTTVUpdate(T,A{n-1});
-            % Multittv for MTTKRP result
             U{n} = double(T);
             
         elseif n == S
-            % RIGHT KRP TENSOR calculation
+            % RIGHT PARTIAL TENSOR 
             T = partialMTTKRPNEW(Z, A, S, 2);
-            % multittv for MTTKRP result
+            % multiTTV for MTTKRP result
             U{n} = multiTTVResult(T,A(n:N));
             
         elseif n < N
-           % Multittv for Internal node update
+           % Internal node update
            T = multiTTVUpdate(T, A{n-1});
-           % Multittv for MTTKRP result
            U{n} = multiTTVResult(T, A(n:N));
            
         else
-           %  Multittv for Internal node update
            T = multiTTVUpdate(T,A{n-1});
-           % Multittv for MTTKRP result
            U{n} = double(T);
         end
-        %MATRIX{n} = T;     
 end
 
 V = A{1} .* U{1};
@@ -122,8 +112,7 @@ f_2 = sum(V(:));
 G{1} = -U{1} + A{1}*Gamma{1};
 
 for n = 2:N
-    %U = mttkrp(Z,A,n);
-    %G{n} = -U + A{n}*Gamma{n};
+   
     
     G{n} = -U{n} + A{n}*Gamma{n};
 end
