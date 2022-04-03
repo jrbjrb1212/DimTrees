@@ -1,7 +1,7 @@
-function V = mttkrp_dt(X,U)
+function V = mttkrp_dt_all(X,U)
 %MTTKRP in all modes of X
 %   
-%   V = mttkrp_dt(X,A) efficently comptues the MTTKRP in each mode of X
+%   V = mttkrp_dt_all(X,A) efficently comptues the MTTKRP in each mode of X
 %   using the factor matrices of U. The ouput of V will be a cell array
 %   containing all the computed MTTKRPs. The size of V will be equal to the
 %   amount of factor matrices in U.
