@@ -8,9 +8,6 @@ function V = mttkrp_dt(X,U)
 %
 %
 
-
-
-
 %% Variable Declarations
 N = size(U,2);
 V = cell(1,N);
