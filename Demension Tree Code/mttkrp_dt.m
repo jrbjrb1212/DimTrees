@@ -12,14 +12,7 @@ function [V, comp_vals]= mttkrp_dt(X,U,S,n,comp_vals)
 
 %% Variable Declarations
 
-% move outside of funciton ASAP
 N = size(U,2);
-% dims = size(X);
-% 
-% % finds split node
-% approx_root = sqrt(prod(dims));
-% list = find(cumprod(dims) <= approx_root);
-% S = list(end) + 1;
 
 %% Main Demension Tree Computations
 
@@ -30,22 +23,19 @@ if n == 1
     
     % Multittv for first MTTKRP result
     V = multiTTVResult(T,U(1:S-1));
-    comp_vals{2} = V;
 
 elseif n < S-1
     % Internal node update
-    T = multiTTVUpdate(comp_vals{end-1},U{n-1});
+    T = multiTTVUpdate(comp_vals{end},U{n-1});
     comp_vals{end+1} = T;
     
     % multiTTV for MTTKRP result
     V = multiTTVResult(T,U(n:S-1));
-    comp_vals{end+1} = V;
 
 elseif n == S-1
     % multiTTV for MTTKRP result
-    T = multiTTVUpdate(comp_vals{end-1},U{n-1});
+    T = multiTTVUpdate(comp_vals{end},U{n-1});
     V = double(T);
-    comp_vals{end+1} = V;
 
 elseif n == S
     % RIGHT PARTIAL TENSOR 
@@ -54,21 +44,18 @@ elseif n == S
     
     % multiTTV for MTTKRP result
     V = multiTTVResult(T,U(n:N));
-    comp_vals{end+1} = V;
 
 elseif n < N
    % Internal node update
-   T = multiTTVUpdate(comp_vals{end-1}, U{n-1});
+   T = multiTTVUpdate(comp_vals{end}, U{n-1});
    comp_vals{end+1} = T;
    
    % multiTTV for MTTKRP result
    V = multiTTVResult(T, U(n:N));
-   comp_vals{end+1} = V;
 
 else
-   T = multiTTVUpdate(comp_vals{end-1},U{n-1});
+   T = multiTTVUpdate(comp_vals{end},U{n-1});
    V = double(T);
-   comp_vals{end+1} = V;
 end
 
 
