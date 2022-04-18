@@ -12,19 +12,26 @@ function V = multiTTVResult(T,U)
 
 % Tensor Dimensions and Rank Calculation
 N = size(U,2);
-R = size(U{1},2);
+R = size(U{1},2)
 dims = size(T);
+
 
 % Matricization of T and preallocation of V
 Tmat = reshape(double(T), [prod(dims(1:end-1)), R]);
 V = zeros(size(T,1),R);
 
-% iterate over the rank of T
+% iterate efficently over the rank of T
 for r = 1:R
-    Z = cellfun(@(x) x(:,r), U(2:N), 'UniformOutput', false);
+    % computes khatriao product of the necesarry column r's of the factor
+    % matrices U
+    Z = cellfun(@(x) x(:,r), U(1:N), 'UniformOutput', false);
     Kvector = khatrirao(Z(end:-1:1));
     
-    T_block = reshape(Tmat(:,r),[dims(1), prod(dims(2:N))]);
+    % Takes a block of data values from the matricized tensor
+    T_block = reshape(Tmat(:,r),[dims(1), prod(dims(2:N+1))]);
+    
+    % Mutliplication of block from matricized tensor and khatriaoed factor
+    % matrices columns
     V(:,r) = T_block * Kvector;
 end
 
