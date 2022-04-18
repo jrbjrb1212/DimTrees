@@ -1,3 +1,5 @@
+% figure out first iteration problem
+
 function [P,Uinit,output] = cp_als_new(X,R,varargin)
 %CP_ALS Compute a CP decomposition of any type of tensor.
 %
@@ -59,6 +61,7 @@ params.addParameter('dimorder',1:N,@(x) isequal(sort(x),1:N));
 params.addParameter('init', 'random', @(x) (iscell(x) || ismember(x,{'random','nvecs'})));
 params.addParameter('printitn',1,@isscalar);
 params.addParameter('fixsigns',true,@islogical);
+params.addParameter('dt',false,@islogical);
 params.parse(varargin{:});
 
 %% Copy from params object
@@ -127,34 +130,50 @@ else
             UtU(:,:,n) = U{n}'*U{n};
         end
     end
+   
     
-    dims = size(X);
-    % finds split node
-    %total_entries = prod(dims);
-    approx_root = sqrt(prod(dims));
-    list = find(cumprod(dims) <= approx_root);
-    S = list(end) + 1;
-    firstiteration = true;
+    % Demension tree option code
+    % pre_allocaiton of temp_vals cell array and declartion of relevant
+    % variables
+    if params.Results.dt
+        dims = size(X);
+        % finds split node
+        approx_root = sqrt(prod(dims));
+        list = find(cumprod(dims) <= approx_root);
+        S = list(end) + 1;
+        firstiteration = true;
+        for i = 1:N
+            if i < S-1
+                temp_vals{i} = tensor(zeros([dims(i:S-1), R]));
+            elseif i == S-1
+                temp_vals{i} = [];
+            elseif i < N
+                temp_vals{i} = tensor(zeros([dims(i:N), R]));
+            else
+                temp_vals{i} = [];
+            end
+        end    
+    end
     
     for iter = 1:maxiters
         
         fitold = fit;
-        comp_vals = [];
         
         % Iterate over all N modes of the tensor
         for n = dimorder(1:end)
-            
-            if ~firstiteration
-                % Calculate Unew = X_(n) * khatrirao(all U except n, 'r').
-                [Unew, comp_vals] = mttkrp_dt(X,U',S,n,comp_vals);
-
+            if params.Results.dt
+                % still does not work on first iterations because we need
+                % to set the demension of the partiall tensors
+                if ~firstiteration                  
+                    [Unew, temp_vals] = mttkrp_dt(X,U',S,n,temp_vals);
+                else
+                    Unew = mttkrp(X,U,n);
+                end
             else
-                 Unew = mttkrp(X,U,n);
+                Unew = mttkrp(X,U,n);
             end
             
             
-            
-            %Unew = mttkrp(X,U,n);
             % Save the last MTTKRP result for fitness check.
             if n == dimorder(end)
               U_mttkrp = Unew;
