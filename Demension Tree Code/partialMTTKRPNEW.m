@@ -21,6 +21,7 @@ N = length(dims);
 R = size(U{1}, 2);
 
 
+
 % LEFT PARTIAL TENSOR COMPUTATION
 % Calculates the khatriao product from N to S and computes with mode
 % deminsons from 1 to S-1
@@ -37,5 +38,4 @@ if side == 2
     Z = tensor(reshape(Z, [dims(S:N), R]));
     
 end
-
 end
