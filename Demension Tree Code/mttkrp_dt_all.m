@@ -1,5 +1,3 @@
-% does not work for unbalanced trees
-
 function V = mttkrp_dt_all(X,U)
 %MTTKRP in all modes of X
 %   
@@ -25,7 +23,7 @@ dims = size(X);
 % number of tensor entries into two by modes
 approx_root = sqrt(prod(dims));
 list = find(cumprod(dims) <= approx_root);
-S = list(end) + 1
+S = list(end) + 1;
 
 
 %% Main Demension Tree Computations
@@ -36,7 +34,6 @@ for n = 1:N
         % Multittv for first MTTKRP result
         V{n} = multiTTVResult(T,U(n+1:S-1));
         
-
     elseif n < S-1
         % Internal node update for n-1 node
         T = multiTTVUpdate(T,U{n-1});
