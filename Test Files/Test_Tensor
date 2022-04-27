@@ -775,12 +775,12 @@ classdef Test_Tensor < matlab.unittest.TestCase
             Old_LT = tensor(tenmat(T, [1,2]) * khatrirao(U{4},U{3}));
             Old_RT = tensor(tenmat(T,[3,4]) * khatrirao(U{2}, U{1}));
             
-            testCase.verifyEqual(New_LT, Old_LT, 'RelTol', 1e-15);
-            testCase.verifyEqual(New_RT, Old_RT, 'RelTol', 1e-15);
+            testCase.verifyEqual(double(tenmat(New_LT,1)), double(tenmat(Old_LT,1)), 'RelTol', 1e-13);
+            testCase.verifyEqual(double(tenmat(New_RT,1)), double(tenmat(Old_RT,1)), 'RelTol', 1e-13);
             
             
-            T = tensor(@rand, [5,5,5,5,5,5]); 
-            U = {rand(5,5), rand(5,5), rand(5,5), rand(5,5), rand(5,5), rand(5,5)};
+            T = tensor(@rand, [9,4,5,4,3,10]); 
+            U = {rand(5,5), rand(9,5), rand(4,5), rand(4,5), rand(3,5), rand(10,5)};
             S = 5;
             
             New_LT = partialMTTKRPNEW(T,U,S,1);
@@ -788,8 +788,8 @@ classdef Test_Tensor < matlab.unittest.TestCase
             Old_LT = tensor(tenmat(T, [1,2,3,4]) * khatrirao(U{6},U{5}));
             Old_RT = tensor(tenmat(T,[5,6]) * khatrirao(U{4},U{3},U{2}, U{1}));
             
-            testCase.verifyEqual(New_LT, Old_LT, 'RelTol', 1e-15);
-            testCase.verifyEqual(New_RT, Old_RT, 'RelTol', 1e-15);
+            testCase.verifyEqual(double(tenmat(New_LT,1)), double(tenmat(Old_LT,1)), 'RelTol', 1e-13);
+            testCase.verifyEqual(double(tenmat(New_RT,1)), double(tenmat(Old_RT,1)), 'RelTol', 1e-13);
             
             
         end
@@ -804,26 +804,39 @@ classdef Test_Tensor < matlab.unittest.TestCase
             
             New_Updated = multiTTVUpdate(T, U{1});
             
-            
-            %instead tempstore move to using T(indexing) for test cases
-            
+                        
             R = size(U{1},2);
             Old_Updated = zeros([size(T,1:3), R]);
             
-            tempStore = ttv(T, U{1}(:,1), 1);
-            Old_Updated(:,:,:,1) = tempStore(:,:,:,1); 
-            
-            tempStore = ttv(T, U{1}(:,2), 1);
-            Old_Updated(:,:,:,2) = tempStore(:,:,:,2); 
-            
-            tempStore = ttv(T, U{1}(:,3), 1);
-            Old_Updated(:,:,:,3) = tempStore(:,:,:,3); 
+            for i = 1:R
+                 tempStore = ttv(T, U{1}(:,i), 1);
+                Old_Updated(:,:,:,i) = tempStore(:,:,:,i); 
+            end
             Old_Updated = tensor(Old_Updated);
             
-            testCase.verifyEqual(New_Updated, Old_Updated, 'RelTol', 1e-10);
             
-            % throw in another test case with nonuniform dimensions with
-            % range between min and max demension size
+            testCase.verifyEqual(double(tenmat(New_Updated,1)), double(tenmat(Old_Updated,1)), 'RelTol', 1e-15);  
+        
+
+            T = tensor(@rand, [10,8,5,9,7]); 
+            U = {rand(10,7), rand(8,7), rand(5,7), rand(9,7)};
+            
+            New_Updated = multiTTVUpdate(T, U{1});
+            
+                        
+            R = size(U{1},2);
+            Old_Updated = zeros([size(T,2:4), R]);
+            
+            
+            for i = 1:R
+                 tempStore = ttv(T, U{1}(:,i), 1);
+                 Old_Updated(:,:,:,i) = tempStore(:,:,:,i); 
+            end
+            Old_Updated = tensor(Old_Updated);
+            
+           
+            testCase.verifyEqual(double(tenmat(New_Updated,1)), double(tenmat(Old_Updated,1)), 'RelTol', 1e-15);  
+            
             
         end
         
@@ -832,29 +845,31 @@ classdef Test_Tensor < matlab.unittest.TestCase
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function multiTTVResult(testCase)
            
-            T = tensor(@rand, [10,10,10,10]); 
+            T = tensor(@rand, [10,10,10,10, 5]); 
             U = {rand(10,5), rand(10,5), rand(10,5), rand(10,5)};
             
-            % LT 
-            T_Update =  tensor(tenmat(T,[1 2]) * khatrirao(U{4}, U{3}));
-            New_result = multiTTVResult(T_Update, {U{1}, U{2}}); % update once fixed
+            New_result = multiTTVResult(T, {U{2}, U{3},U{4}});
             
-            Old_result = mttkrp(T, U, 1);
+            for i = 1:5
+                tempStore = mttkrp(T(:,:,:,:,i), U, 1);
+                Old_result(:,i) = tempStore(:,i); 
+            end
             
-            testCase.verifyEqual(New_result, Old_result, 'RelTol', 1e-10);
+            testCase.verifyEqual(New_result, Old_result, 'RelTol', 1e-13);
             
+                        
+            T = tensor(@rand, [8,12,4,18, 5]); 
+            U = {rand(8,5), rand(12,5), rand(4,5), rand(18,5)};
             
-            T_Update =  tensor(tenmat(T,[3 4]) * khatrirao(U{2}, U{1}));
-            New_result = multiTTVResult(T_Update, {U{3}, U{4}});
+            New_result = multiTTVResult(T, {U{2}, U{3}, U{4}});
+            Old_result = zeros(size(New_result));
             
-            Old_result = mttkrp(T, U, 3);
+            for i = 1:5
+                tempStore = mttkrp(T(:,:,:,:,i), U, 1);
+                Old_result(:,i) = tempStore(:,i); 
+            end
             
-            testCase.verifyEqual(New_result, Old_result, 'RelTol', 1e-10);
-            
-            % try to get a test case that only does multiTTVResult and
-            % mttkrp computation 
-            
-            % do later
+            testCase.verifyEqual(New_result, Old_result, 'RelTol', 1e-13);
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -872,13 +887,11 @@ classdef Test_Tensor < matlab.unittest.TestCase
             end
             New_MTTKRPs = mttkrp_dt_all(T,U);
             
-            testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-15);
+            testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-13);
                        
             
-            % use nonuniform demension sizes and a random rank in between
-            % the max size demension and min size
-            T = tensor(@rand, [10,10,10,10,10,10]); 
-            U = {rand(10,5), rand(10,5), rand(10,5), rand(10,5),rand(10,5),rand(10,5)};
+            T = tensor(@rand, [9,4,6,8,7,3]); 
+            U = {rand(9,5), rand(4,5), rand(6,5), rand(8,5),rand(7,5),rand(3,5)};
             New_MTTKRPs = cell(1, size(U,2)-1);
             Old_MTTKRPs = New_MTTKRPs;
             
@@ -887,12 +900,7 @@ classdef Test_Tensor < matlab.unittest.TestCase
             end
             New_MTTKRPs = mttkrp_dt_all(T,U);
             
-            testCase.verifyEqual(New_MTTKRPs{1}, Old_MTTKRPs{1}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{2}, Old_MTTKRPs{2}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{3}, Old_MTTKRPs{3}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{4}, Old_MTTKRPs{4}, 'RelTol', 1e-10);            
-            testCase.verifyEqual(New_MTTKRPs{5}, Old_MTTKRPs{5}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{6}, Old_MTTKRPs{6}, 'RelTol', 1e-10);            
+            testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-13);         
                         
         end
         
@@ -905,43 +913,74 @@ classdef Test_Tensor < matlab.unittest.TestCase
             U = {rand(10,5), rand(10,5), rand(10,5), rand(10,5)};
             New_MTTKRPs = cell(1, size(U,2)-1);
             Old_MTTKRPs = New_MTTKRPs;
-            comp_vals = [];
-            
-            S = 3;
-            
+            % Preallocation of memory
+            S = 3; R = 5; N = 4;
+            dims = size(T);
+            for i = 1:N
+                if i < S-1
+                    temp_vals{i} = tensor(zeros([dims(i:S-1), R]));
+                elseif i == S-1
+                    temp_vals{i} = [];
+                elseif i < N
+                    temp_vals{i} = tensor(zeros([dims(i:N), R]));
+                else
+                    temp_vals{i} = [];
+                end
+            end
+              
+                        
             for n = 1:size(U,2)
                 Old_MTTKRPs{n} = mttkrp(T,U,n);
             end
             
             for n = 1:size(U,2)
-                [New_MTTKRPs{n}, comp_vals] = mttkrp_dt(T,U,S,n,comp_vals);
+                [New_MTTKRPs{n}, temp_vals] = mttkrp_dt(T,U,S,n,temp_vals);
             end
 
            
             
-            testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-10);
-%             testCase.verifyEqual(New_MTTKRPs{2}, Old_MTTKRPs{2}, 'RelTol', 1e-10);
-%             testCase.verifyEqual(New_MTTKRPs{3}, Old_MTTKRPs{3}, 'RelTol', 1e-10);
-%             testCase.verifyEqual(New_MTTKRPs{4}, Old_MTTKRPs{4}, 'RelTol', 1e-10);
+%             testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-10);
+            testCase.verifyEqual(New_MTTKRPs{1}, Old_MTTKRPs{1}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{2}, Old_MTTKRPs{2}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{3}, Old_MTTKRPs{3}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{4}, Old_MTTKRPs{4}, 'RelTol', 1e-14);            
+
                        
             % test case with nonuniform demensions and rank changes
-            T = tensor(@rand, [10,10,10,10,10,10]); 
-            U = {rand(10,5), rand(10,5), rand(10,5), rand(10,5), rand(10,5), rand(10,5)};
+            T = tensor(@rand, [8,7,3,9,6]); 
+            U = {rand(8,5), rand(7,5), rand(3,5), rand(9,5), rand(6,5)};
             New_MTTKRPs = cell(1, size(U,2)-1);
             Old_MTTKRPs = New_MTTKRPs;
+            % Preallocation of memory 
+            S = 3; R = 5; N = 4;
+            dims = size(T);
+            for i = 1:N
+                if i < S-1
+                    temp_vals{i} = tensor(zeros([dims(i:S-1), R]));
+                elseif i == S-1
+                    temp_vals{i} = [];
+                elseif i < N
+                    temp_vals{i} = tensor(zeros([dims(i:N), R]));
+                else
+                    temp_vals{i} = [];
+                end
+            end
             
             for n = 1:size(U,2)
                 Old_MTTKRPs{n} = mttkrp(T,U,n);
             end
-            New_MTTKRPs = mttkrp_dt_all(T,U);
+            for n = 1:size(U,2)
+                [New_MTTKRPs{n}, temp_vals] = mttkrp_dt(T,U,S,n,temp_vals);
+            end
             
-            testCase.verifyEqual(New_MTTKRPs{1}, Old_MTTKRPs{1}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{2}, Old_MTTKRPs{2}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{3}, Old_MTTKRPs{3}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{4}, Old_MTTKRPs{4}, 'RelTol', 1e-10);            
-            testCase.verifyEqual(New_MTTKRPs{5}, Old_MTTKRPs{5}, 'RelTol', 1e-10);
-            testCase.verifyEqual(New_MTTKRPs{6}, Old_MTTKRPs{6}, 'RelTol', 1e-10);            
-    end
+%             testCase.verifyEqual(New_MTTKRPs, Old_MTTKRPs, 'RelTol', 1e-10);
+            testCase.verifyEqual(New_MTTKRPs{1}, Old_MTTKRPs{1}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{2}, Old_MTTKRPs{2}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{3}, Old_MTTKRPs{3}, 'RelTol', 1e-14);
+            testCase.verifyEqual(New_MTTKRPs{4}, Old_MTTKRPs{4}, 'RelTol', 1e-14);            
+            testCase.verifyEqual(New_MTTKRPs{5}, Old_MTTKRPs{5}, 'RelTol', 1e-14);
+
+        end
         
     end
     
