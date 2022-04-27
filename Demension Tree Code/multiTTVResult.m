@@ -2,17 +2,22 @@ function V = multiTTVResult(T,U)
 %multiTTVResult computes an mttkrp result
 %   
 %   V = multiTTVResult(T,U) computes a mttkrp result from tesnor T and a
-%   shortened amount of factor matrices. T will be multipied by the
-%   khatriao product of the factor matrix, which will yield V a singular
+%   cell array of shortened amount of factor matrices. T will be multipied 
+%   by the khatriao product of the factor matrix, which will yield V a 
+%   singular
 %   2-way tensor. V will be the same demensions as the factor matrices 
 %   in U.
 %
 
 %% MTTKRP result calculation
+if isempty(U)
+    V = double(T);
+    return;
+end
 
 % Tensor Dimensions and Rank Calculation
 N = size(U,2);
-R = size(U{1},2)
+R = size(U{1},2);
 dims = size(T);
 
 
