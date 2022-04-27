@@ -16,6 +16,7 @@ function [P,Uinit,output] = cp_als_new(X,R,varargin)
 %      'init' - Initial guess [{'random'}|'nvecs'|cell array]
 %      'printitn' - Print fit every n iterations; 0 for no printing {1}
 %      'fixsigns' - Call fixsigns at end of iterations {true}
+%      'dt' - Use demension strucutre to efficently compute MTTKRPs {true}
 %
 %   [M,U0] = CP_ALS(...) also returns the initial guess.
 %
