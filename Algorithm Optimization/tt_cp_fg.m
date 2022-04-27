@@ -1,4 +1,4 @@
-function [f,G] = tt_cp_fg_NEW(Z,A,Znormsqr)
+function [f,G] = tt_cp_fg(Z,A,Znormsqr,varargin)
 %TT_CP_FG Computes function and gradient of the CP function.
 %
 %   [F,G] = TT_CP_FG(Z,A) calculates F = (1/2) ||Z - ktensor(A)||^2 where
@@ -17,6 +17,11 @@ function [f,G] = tt_cp_fg_NEW(Z,A,Znormsqr)
 %
 %MATLAB Tensor Toolbox. Copyright 2018, Sandia Corporation.
 
+
+%% Set algorithm parameters from input or by using defaults
+params = inputParser;
+params.addParameter('dt',false,@islogical);
+params.parse(varargin{:});
 
 
 %% Set-up
@@ -62,61 +67,35 @@ else
     f_1 = norm(Z)^2;
 end
 
-%% Calculate gradient and F2 with Dimension Trees Optimization
+%% Calculate gradient and F2
 G = cell(N,1);
-U = G;
 
-dims = size(Z);
-% finds split node
-%total_entries = prod(dims);
-approx_root = sqrt(prod(dims));
-list = find(cumprod(dims) <= approx_root);
-S = list(end) + 1;
-
-% dimtrees optimization for mttkrp
-for n = 1:N
-        if n == 1
-            % LEFT PARTIAL TENSOR 
-            T = partialMTTKRPNEW(Z, A, S, 1);
-            % Multittv for first MTTKRP result
-            U{n} = multiTTVResult(T,A(1:S-1));
-            
-        elseif n < S-1
-            % Internal node update
-            T = multiTTVUpdate(T,A{n-1});
-            U{n} = multiTTVResult(T,A(n:S-1));
-          
-        elseif n == S-1
-            T = multiTTVUpdate(T,A{n-1});
-            U{n} = double(T);
-            
-        elseif n == S
-            % RIGHT PARTIAL TENSOR 
-            T = partialMTTKRPNEW(Z, A, S, 2);
-            % multiTTV for MTTKRP result
-            U{n} = multiTTVResult(T,A(n:N));
-            
-        elseif n < N
-           % Internal node update
-           T = multiTTVUpdate(T, A{n-1});
-           U{n} = multiTTVResult(T, A(n:N));
-           
-        else
-           T = multiTTVUpdate(T,A{n-1});
-           U{n} = double(T);
-        end
-end
-
-V = A{1} .* U{1};
-f_2 = sum(V(:));
-G{1} = -U{1} + A{1}*Gamma{1};
-
-for n = 2:N
-   
+% Default Implementation
+if ~params.Results.dt
+    U = mttkrp(Z,A,1, 2);
+    V = A{1} .* U;
+    f_2 = sum(V(:));
+    G{1} = -U + A{1}*Gamma{1};
+    for n = 2:N
+        U = mttkrp(Z,A,n, 2);
+        G{n} = -U + A{n}*Gamma{n};
+    end
     
-    G{n} = -U{n} + A{n}*Gamma{n};
-end
+% Demension Tree Option for better performance
+else
+    % Computes MTTKRP in all modes and stores in cell array
+    % Index within cell is same as mode in tensor
+    U = mttkrp_dt_all(Z,A);
 
+    V = A{1} .* U{1};
+    f_2 = sum(V(:));
+    G{1} = -U{1} + A{1}*Gamma{1};
+
+    % Compute gradient using precomputed MTTKRPs
+    for n = 2:N
+        G{n} = -U{n} + A{n}*Gamma{n};
+    end
+end
 
 %F3
 W = Gamma{1} .* Upsilon{1};
@@ -124,4 +103,5 @@ f_3 = sum(W(:));
 
 %SUM
 f = 0.5 * f_1 - f_2 + 0.5 * f_3;
+
 
