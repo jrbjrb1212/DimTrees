@@ -1,0 +1,35 @@
+function [] = dim_tree_ttms_all(X,U)
+% dimension trees improvment for ttm computation in HOOI algorithm
+% X is the full tensor
+% U is the factor matrices
+
+M = containers.Map();
+    function [] = dfs(curr_ten, modes)
+        if size(U,2) == 1
+            U(moswa(1)) = curr_ten;
+        elseif size(U,2) == 0
+            disp("error occured breaking early");
+            quit
+        end
+        mid = floor((size(U, 2))/2);
+        left_in_nodes = U(mid+1:size(U,2));
+        right_in_nodes = U(1:mid);
+        
+        % dfs on the left side
+        for n = 1:size(left_in_nodes,2)
+            % ttm one at a time
+            curr_ten = ttm(curr_ten, U(n));
+        end
+        
+        % dfs on the right side
+%         for n = 1:size(left_in_nodes,2)
+%             % ttm one at a time
+%              curr_ten = ttm(curr_ten, U(n));
+%         end
+        
+    end
+
+dfs(X, [1,2,3,4])
+disp(M)
+
+end

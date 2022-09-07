@@ -1,0 +1,7 @@
+function [] = dim_tree_ttms(X,U,n)
+% dimension trees improvment for ttm computation in HOOI algorithm
+% X is the full tensor
+% U is the factor matrices
+% n is the current
+
+end
